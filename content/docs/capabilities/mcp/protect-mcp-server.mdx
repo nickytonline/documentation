@@ -82,7 +82,20 @@ Add the route configuration shown above to your Pomerium config. Key points:
 - The `policy` block controls who can access the server and which tools are allowed
 - See [Limit MCP Tool Calling](/docs/capabilities/mcp/limit-mcp-tools) for advanced policy patterns
 
-### 3. Connect an MCP client
+### 3. Allow MCP clients
+
+Most MCP clients, such as VS Code, Claude, and ChatGPT, identify themselves with a [Client ID Metadata Document](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document) (CIMD): their client ID is an HTTPS URL that publishes the client's metadata, including its redirect URIs. Pomerium accepts a client ID only if its domain is listed in `mcp_allowed_client_id_domains`:
+
+```yaml
+mcp_allowed_client_id_domains:
+  - 'vscode.dev'
+```
+
+Clients from other domains see an error page when they try to sign in. List only clients you trust: the allowlist decides which applications can obtain tokens that act on behalf of your users, and which domains Pomerium fetches client metadata from. See [Allowed Client ID Domains](/docs/capabilities/mcp/reference#allowed-client-id-domains).
+
+For clients that only support Dynamic Client Registration (DCR), which the MCP specification deprecated in favor of CIMD, enable the `mcp_dynamic_client_registration` [runtime flag](/docs/reference/runtime-flags).
+
+### 4. Connect an MCP client
 
 Point any MCP-compatible client at the Pomerium route URL. The client will go through Pomerium's OAuth flow, receive a bearer token, and use it for all subsequent requests.
 
@@ -90,7 +103,7 @@ Point any MCP-compatible client at the Pomerium route URL. The client will go th
 Server URL: https://my-mcp-server.your-domain.com
 ```
 
-### 4. Verify with the MCP Inspector
+### 5. Verify with the MCP Inspector
 
 Use the MCP Inspector to confirm connectivity:
 
